@@ -20,11 +20,17 @@ python -V
 python3 -m venv .venv
 ```
 
-## Activate venv and run any of the programs
+## Activate venv and install dependencies
 
 **Important: check the correct way of activation depending on your shell. Consult [here.](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments)** (I use [fish shell](https://fishshell.com/))
 
 ```sh
 source .venv/bin/activate.fish
+python -m pip install -r requirements.txt
+```
+
+## Run any of the programs
+
+```sh
 python <program-name>.py
 ```
