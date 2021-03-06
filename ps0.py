@@ -1,9 +1,10 @@
 import numpy
+from helpers import isInt
 
 x = 0
 y = 0
 
-def isNumber(test):
+def isInt(test):
   try:
     int(test)
     return True
@@ -12,7 +13,7 @@ def isNumber(test):
 
 def get_x_value():
   x = input('Enter number x: ')
-  if (isNumber(x)):
+  if (isInt(x)):
     return int(x)
   else:
     print('Please, enter number x:')
@@ -20,7 +21,7 @@ def get_x_value():
   
 def get_y_value():
   y = input('Enter number y: ')
-  if (isNumber(y)):
+  if (isInt(y)):
     return int(y)
   else:
     print('Please, enter number y:')
