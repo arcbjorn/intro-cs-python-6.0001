@@ -1,5 +1,5 @@
 from helpers import get_user_input_as_float
-import numpy as np
+# import numpy as np
 
 
 def get_months_to_save_for_down_payment() -> int:
