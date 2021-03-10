@@ -14,22 +14,26 @@ def isFloat(test):
     except ValueError:
         return False
 
+
 # for ps1
 
 
 def get_user_input_as_float(message: str) -> float:
-    value = input(message)
-    if (isFloat(value)):
+    try:
+        value = input(message)
         return float(value)
-    else:
+    except ValueError:
         print('Please, use number!')
         return get_user_input_as_float(message)
 
 
+# for ps3
+
+
 def get_user_input_as_int(message: str) -> int:
-    value = input(message)
-    if (isInt(value)):
+    try:
+        value = input(message)
         return int(value)
-    else:
-        print('Please, use number!')
+    except ValueError:
+        print('Please, use number! Could be decimal')
         return get_user_input_as_int(message)
