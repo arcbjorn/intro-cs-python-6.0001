@@ -24,3 +24,12 @@ def get_user_input_as_float(message: str) -> float:
     else:
         print('Please, use number!')
         return get_user_input_as_float(message)
+
+
+def get_user_input_as_int(message: str) -> int:
+    value = input(message)
+    if (isInt(value)):
+        return int(value)
+    else:
+        print('Please, use number!')
+        return get_user_input_as_int(message)
