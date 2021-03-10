@@ -3,9 +3,9 @@
 # The 6.0001 Word Game
 # Created by: Kevin Luu <luuk> and Jenna Wiens <jwiens>
 #
-# Name          : <your name>
-# Collaborators : <your collaborators>
-# Time spent    : <total time>
+# Name          : Oleg Luganskiy <arcbjorn>
+# Collaborators : None
+# Time spent    : 10101000110000 sec
 
 import math
 import random
