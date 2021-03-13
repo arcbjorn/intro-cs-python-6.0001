@@ -54,7 +54,66 @@ def process(url):
 
 # Problem 1
 
-# TODO: NewsStory
+
+class NewsStory:
+    """
+    Single news story from a RSS feed
+    """
+
+    def __init__(self, guid, title, description, link, pubdate):
+        """
+        :param guid: Unique ID
+        :type guid: str
+        :param title: Title
+        :type title: str
+        :param description: Description
+        :type description: str
+        :param link: Link
+        :type link: str
+        :param pubdate: Publication date
+        :type pubdate: str
+        """
+
+        self.guid = guid
+        self.title = title
+        self.description = description
+        self.link = link
+        self.pubdate = pubdate
+
+    def get_guid(self):
+        """
+        :returns: Unique id
+        :rtype: str
+        """
+        return self.guid
+
+    def get_title(self):
+        """
+        :returns: Title
+        :rtype: str
+        """
+        return self.title
+
+    def get_description(self):
+        """
+        :returns: Description
+        :rtype: str
+        """
+        return self.description
+
+    def get_link(self):
+        """
+        :returns: Link
+        :rtype: str
+        """
+        return self.link
+
+    def get_pubdate(self):
+        """
+        :returns: Publication date
+        :rtype: str
+        """
+        return self.pubdate
 
 
 # ======================
@@ -73,36 +132,273 @@ class Trigger(object):
 # PHRASE TRIGGERS
 
 # Problem 2
-# TODO: PhraseTrigger
+
+
+class PhraseTrigger(Trigger):
+    """
+    Trigger for a phrase
+    """
+
+    def __init__(self, phrase):
+        """
+        :param phrase: Phrase for the trigger
+        :type phrase: str
+        """
+        self.phrase = phrase
+
+    def includes_phrase(self, text):
+        """
+        Checks if the phrase is in text
+        :param text: Text
+        :type text: str
+        :returns: Is phrase in the text?
+        :rtype: bool
+        """
+
+        phrase = self.phrase.lower()
+        phrase_words = phrase.split(' ')
+
+        # remove punctuation
+        text = [' ' if c in string.punctuation else c for c in text.lower()]
+        text_words = [word for word in ''.join(text).split(' ') if len(word)]
+
+        if len(phrase_words) == 1:
+            return phrase in text_words
+
+        # work through multiple words
+        try:
+            start_w_index = text_words.index(phrase_words[0])
+            phrase_word_count = 1
+            index = start_w_index + phrase_word_count
+            status = False
+
+            # as long as other words follow
+            while index < len(text_words):
+                if phrase_words[phrase_word_count] == text_words[index]:
+                    phrase_word_count += 1
+                else:  # word is not in phrase
+                    break
+                if phrase_word_count == len(phrase_words):  # all words
+                    status = True
+                    break
+                index += 1
+            return status
+        except ValueError:  # first phrase word not in text
+            return False
+
 
 # Problem 3
-# TODO: TitleTrigger
+class TitleTrigger(PhraseTrigger):
+    """
+    Trigger for a phrase in story's title.
+    """
+
+    def __init__(self, phrase):
+        """
+        :param phrase: Phrase for trigger
+        :type phrase: str
+        """
+        PhraseTrigger.__init__(self, phrase)
+
+    def evaluate(self, story):
+        """
+        Checks if phrase is in the  title
+        :param story: Story
+        :type story: NewsStory
+        :returns: is phrase in story's title?
+        :rtype: bool
+        """
+
+        title = story.get_title()
+        return self.includes_phrase(title)
 
 # Problem 4
-# TODO: DescriptionTrigger
+
+
+class DescriptionTrigger(PhraseTrigger):
+    """
+    Trigger for phrase in story's description
+    """
+
+    def __init__(self, phrase):
+        """
+        :param phrase: Phrase for trigger
+        :type phrase: str
+        """
+
+        PhraseTrigger.__init__(self, phrase)
+
+    def evaluate(self, story):
+        """
+        Checks if phrase is in story's description
+        :param story: Story
+        :type story: NewsStory
+        :returns: is pharase in desciption?
+        :rtype: bool
+        """
+
+        description = story.get_description()
+        return self.includes_phrase(description)
 
 # TIME TRIGGERS
 
 # Problem 5
-# TODO: TimeTrigger
-# Constructor:
-#        Input: Time has to be in EST and in the format of "%d %b %Y %H:%M:%S".
-#        Convert time from string to a datetime before saving it as an attribute.
+
+
+class TimeTrigger(Trigger):
+    """
+    Trigger for a certain time
+    """
+
+    def __init__(self, time):
+        """
+        :param time: Time for trigger
+        :type time: str
+        """
+
+        self.time = datetime.strptime(time, '%d %b %Y %H:%M:%S') \
+                            .replace(tzinfo=pytz.timezone('EST'))
 
 # Problem 6
-# TODO: BeforeTrigger and AfterTrigger
+
+
+class BeforeTrigger(TimeTrigger):
+    """
+    Trigger for story published before certain time
+    """
+
+    def __init__(self, time):
+        """
+        :param time: Time for trigger
+        :type time: str
+        """
+
+        TimeTrigger.__init__(self, time)
+
+    def evaluate(self, story):
+        """
+        Checks if the provided news story is published before the trigger's
+        time.
+        :param story: Story
+        :type story: NewsStory
+        :returns: Was published before trigger's time?
+        :rtype: bool
+        """
+
+        before_time = story.get_pubdate().replace(tzinfo=pytz.timezone('EST'))
+        return before_time < self.time
+
+
+class AfterTrigger(TimeTrigger):
+    """
+    Trigger for story
+    """
+
+    def __init__(self, time):
+        """
+        :param time: Time for trigger
+        :type time: str
+        """
+
+        TimeTrigger.__init__(self, time)
+
+    def evaluate(self, story):
+        """
+        Checks if story is published after trigger's time.
+        :param story: Story
+        :type story: NewsStory
+        :returns: is published after trigger's time?
+        :rtype: bool
+        """
+
+        after_time = story.get_pubdate().replace(tzinfo=pytz.timezone('EST'))
+        return after_time > self.time
 
 
 # COMPOSITE TRIGGERS
 
 # Problem 7
-# TODO: NotTrigger
+class NotTrigger(Trigger):
+    """
+    Trigger that inverts other trigger
+    """
+
+    def __init__(self, trigger):
+        """
+        :param trigger: The trigger to invert
+        :type trigger: Trigger
+        """
+
+        self.trigger = trigger
+
+    def evaluate(self, story):
+        """
+        :param story: The news story to check.
+        :type story: NewsStory
+        """
+
+        return not self.trigger.evaluate(story)
 
 # Problem 8
-# TODO: AndTrigger
+
+
+class AndTrigger(Trigger):
+    """
+    Trigger that checks if story satisfied by both triggers
+    """
+
+    def __init__(self, trigger1, trigger2):
+        """
+        :param trigger1: First trigger
+        :type trigger1: Trigger
+        :param trigger2: Second trigger
+        :type trigger2: Trigger
+        """
+
+        self.trigger1 = trigger1
+        self.trigger2 = trigger2
+
+    def evaluate(self, story):
+        """
+        :param story: Story
+        :type story: NewsStory
+        :returns: both triggers satisfied ?
+        :rtype: bool
+        """
+
+        res1 = self.trigger1.evaluate(story)
+        res2 = self.trigger2.evaluate(story)
+        return res1 and res2
 
 # Problem 9
-# TODO: OrTrigger
+
+
+class OrTrigger(Trigger):
+    """
+    Trigger that checks if at least one trigger is satisfied by story
+    """
+
+    def __init__(self, trigger1, trigger2):
+        """
+        :param trigger1: The first trigger to check.
+        :type trigger1: Trigger
+        :param trigger2: The second trigger to check.
+        :type trigger2: Trigger
+        """
+        self.trigger1 = trigger1
+        self.trigger2 = trigger2
+
+    def evaluate(self, story):
+        """
+        :param story: Story
+        :type story: Story
+        :returns: is one or another trigger satidfied by story?
+        :rtype: bool
+        """
+
+        res1 = self.trigger1.evaluate(story)
+        res2 = self.trigger2.evaluate(story)
+        return res1 or res2
 
 
 # ======================
@@ -116,10 +412,8 @@ def filter_stories(stories, triggerlist):
 
     Returns: a list of only the stories for which a trigger in triggerlist fires.
     """
-    # TODO: Problem 10
-    # This is a placeholder
-    # (we're just returning all the stories, with no filtering)
-    return stories
+
+    return [s for s in stories if any(t.evaluate(s) for t in triggerlist)]
 
 
 # ======================
@@ -142,11 +436,28 @@ def read_trigger_config(filename):
         if not (len(line) == 0 or line.startswith('//')):
             lines.append(line)
 
-    # TODO: Problem 11
-    # line is the list of lines that you need to parse and for which you need
-    # to build triggers
+    trigger_dict = {}
+    trigger_list = []
 
-    print(lines)  # for now, print it so you see what it contains!
+    for i in range(len(lines)):
+        trig = lines[i].split(',')
+        if trig[1] == 'TITLE':
+            trigger_dict[trig[0]] = TitleTrigger(trig[2])
+        elif trig[1] == 'DESCRIPTION':
+            trigger_dict[trig[0]] = DescriptionTrigger(trig[2])
+        elif trig[1] == 'AFTER':
+            trigger_dict[trig[0]] = AfterTrigger(trig[2])
+        elif trig[1] == 'BEFORE':
+            trigger_dict[trig[0]] = BeforeTrigger(trig[2])
+        elif trig[1] == 'NOT':
+            trigger_dict[trig[0]] = NotTrigger(trig[2])
+        elif trig[1] == 'AND':
+            trigger_dict[trig[0]] = AndTrigger(
+                trigger_dict[trig[2]], trigger_dict[trig[3]])
+        elif trig[0] == 'ADD':
+            for x in range(1, len(trig)):
+                trigger_list.append(trigger_dict[trig[x]])
+    return trigger_list
 
 
 SLEEPTIME = 120  # seconds -- how often we poll
@@ -162,9 +473,7 @@ def main_thread(master):
         t4 = AndTrigger(t2, t3)
         triggerlist = [t1, t4]
 
-        # Problem 11
-        # TODO: After implementing read_trigger_config, uncomment this line
-        # triggerlist = read_trigger_config('triggers.txt')
+        triggerlist = read_trigger_config('triggers.txt')
 
         # HELPER CODE - you don't need to understand this!
         # Draws the popup window that displays the filtered stories
